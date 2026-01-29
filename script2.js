@@ -111,10 +111,18 @@ class Pelota {
         if(this.x - this.r/2 <= 0 || this.x + this.r/2 >= width){
             this.vx *= -1
         }
-        if(this.y - this.r/2 <= 0 || this.y + this.r/2 >= height){
+        if(this.y - this.r/2 <= 0 ){
             this.vy *= -1
         }
+        if(this.y + this.r/2 >= height)
+            reiniciar()
         
+    }
+    reiniciar(){
+        this.vx=0
+        this.vy=0
+        this.x= width/2
+        this.y= height/2
     }
 }
 
