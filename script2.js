@@ -286,12 +286,12 @@ let bloques = []
 
 
 let mySound;
-let pelota = new Pelota(500, 300, 10,mySound)
 
 function preload() {
-  soundFormats("wav");
-  mySound = loadSound("healsound.wav");
+    soundFormats("wav");
+    mySound = loadSound("healsound.wav");
 }
+let pelota = new Pelota(500, 300, 10, mySound)
 
 function setup() {
 
