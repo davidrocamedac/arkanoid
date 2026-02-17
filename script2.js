@@ -139,14 +139,14 @@ class Pelota {
         noStroke()
 
     }
-    mover() {
+    mover(sonido) {
 
         this.prevX = this.x
         this.prevY = this.y
 
         this.y += this.vy
         this.x += this.vx
-        this.rebotar()
+        this.rebotar(sonido)
 
         if (millis() - this.tiempoReinicio > 1000 && this.activarMovimiento) {
             this.vx = random(-1, 1) * 3
@@ -166,7 +166,7 @@ class Pelota {
         this.tiempoReinicio = millis()
 
     }
-    rebotar() {
+    rebotar(sonido) {
 
 
         // izquierda
@@ -190,7 +190,7 @@ class Pelota {
         // abajo
         if (this.y + this.r / 2 >= height) {
             this.reiniciar()
-            this.sonido.play();
+            sonido.play();
         }
 
 
@@ -291,7 +291,7 @@ function preload() {
     soundFormats("wav");
     mySound = loadSound("healsound.wav");
 }
-let pelota = new Pelota(500, 300, 10, mySound)
+let pelota = new Pelota(500, 300, 10)
 
 function setup() {
 
@@ -312,7 +312,7 @@ function setup() {
 function draw() {
     background(63, 197, 212)
 
-    pelota.mover()
+    pelota.mover(mySound)
     pelota.mostrar()
     pelota.rebotePala(jugador)
 
