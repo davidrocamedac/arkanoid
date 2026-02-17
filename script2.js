@@ -288,7 +288,7 @@ let bloques = []
 let mySound;
 
 function preload() {
-    //soundFormats("wav");
+    soundFormats("wav");
     mySound = loadSound("healsound.wav");
 }
 let pelota = new Pelota(500, 300, 10)
