@@ -72,105 +72,270 @@ class Bloque {
         this.h = h
         this.color = "white"
         this.visible = true
+        this.vida = Math.floor(Math.random() * 5) + 1
     }
     mostrar() {
         if (!this.visible) return
+        stroke("black")
 
-        fill(this.color)
+        this.actualizarColor()
         rect(this.x, this.y, this.w, this.h)
+        noStroke()
 
+    }
+    perderVida() {
+        this.vida -= 1
+        if (this.vida <= 0) {
+            this.visible = false
+        }
+
+    }
+    actualizarColor() {
+        switch (this.vida) {
+            case 1:
+                fill("white")
+                break;
+            case 2:
+                fill("yellow")
+                break;
+            case 3:
+                fill("blue")
+                break;
+            case 4:
+                fill("red")
+                break;
+            case 5:
+                fill("black")
+                break;
+
+            default:
+                break;
+        }
     }
 }
 
 
 class Pelota {
-    constructor(x, y,r) {
+    constructor(x, y, r, sonido) {
         this.x = x
         this.y = y
-        this.vx = -20
-        this.vy = -10
-        this.r=r
+        this.vx = -7
+        this.vy = -5
+        this.prevX = x
+        this.prevY = y
+        this.r = r
         this.color = "red"
         this.visible = true
+        this.tiempoReinicio = 0;
+        this.activarMovimiento = false;
+        this.sonido=sonido
     }
     mostrar() {
         if (!this.visible) return
 
+        stroke("black")
         fill(this.color)
         circle(this.x, this.y, this.r)
+        noStroke()
 
     }
-    mover(){
+    mover() {
+
+        this.prevX = this.x
+        this.prevY = this.y
 
         this.y += this.vy
         this.x += this.vx
         this.rebotar()
 
+        if (millis() - this.tiempoReinicio > 1000 && this.activarMovimiento) {
+            this.vx = random(-1, 1) * 3
+            // this.vx = 0
+            this.vy = 5
+            this.activarMovimiento = false
+        }
+
     }
-    rebotar(){
-        if(this.x - this.r/2 <= 0 || this.x + this.r/2 >= width){
+
+    reiniciar() {
+        this.activarMovimiento = true
+        this.vx = 0
+        this.vy = 0
+        this.x = width / 2
+        this.y = height / 2
+        this.tiempoReinicio = millis()
+
+    }
+    rebotar() {
+
+
+        // izquierda
+        if (this.x - this.r / 2 <= 0) {
+            this.x = this.r / 2
             this.vx *= -1
         }
-        if(this.y - this.r/2 <= 0 ){
+
+        // derecha
+        if (this.x + this.r / 2 >= width) {
+            this.x = width - this.r / 2
+            this.vx *= -1
+        }
+
+        // arriba
+        if (this.y - this.r / 2 <= 0) {
+            this.y = this.r / 2
             this.vy *= -1
         }
-        if(this.y + this.r/2 >= height)
-            reiniciar()
-        
+
+        // abajo
+        if (this.y + this.r / 2 >= height) {
+            this.reiniciar()
+            this.sonido.play();
+        }
+
+
+
     }
-    reiniciar(){
-        this.vx=0
-        this.vy=0
-        this.x= width/2
-        this.y= height/2
+
+    rebotePala(jugador) {
+        let colision =
+            this.x + this.r / 2 > jugador.x &&
+            this.x - this.r / 2 < jugador.x + jugador.w &&
+            this.y + this.r / 2 > jugador.y &&
+            this.y - this.r / 2 < jugador.y + jugador.h
+
+        if (colision && this.vy > 0) {
+            let centro = jugador.x + jugador.w / 2
+            let distancia = (this.x - centro) / (jugador.w / 2)
+            this.vx = distancia * 6
+            this.vy *= -1
+        }
+
+    }
+
+    reboteBloque(bloque) {
+
+        if (!bloque.visible) return;
+
+        let colision =
+            this.x + this.r / 2 > bloque.x &&
+            this.x - this.r / 2 < bloque.x + bloque.w &&
+            this.y + this.r / 2 > bloque.y &&
+            this.y - this.r / 2 < bloque.y + bloque.h
+
+        if (!colision) return
+
+
+        if (this.prevY + this.r / 2 <= bloque.y) {
+            this.vy *= -1
+            bloque.perderVida()
+            return
+        }
+
+        else if (this.prevY - this.r / 2 >= bloque.y + bloque.h) {
+            this.vy *= -1
+            bloque.perderVida()
+            return
+        }
+
+        else if (this.prevX + this.r / 2 <= bloque.x) {
+            this.vx *= -1
+            bloque.perderVida()
+            return
+        }
+
+        else if (this.prevX - this.r / 2 >= bloque.x + bloque.w) {
+            this.vx *= -1
+            bloque.perderVida()
+            return
+        }
+
     }
 }
 
-let pelota= new Pelota(500, 300, 20)
 
-let bloque1 = new Bloque(200, 100, 50, 10)
-let bloque2 = new Bloque(260, 100, 50, 10)
+class Jugador {
+    constructor(x, y, w, h) {
+        this.x = x
+        this.y = y
+        this.w = w
+        this.h = h
+        this.velocidad = 7
+        this.color = "black"
+        this.pressIzquierda = false
+        this.pressDerecha = false
+    }
+
+    moverPala() {
+        this.x = constrain(mouseX, 0, width - this.w)
+    }
+
+    mostrarPala() {
+
+        stroke("white")
+        fill(this.color)
+        rect(this.x, this.y, this.w, this.h)
+        noStroke()
+    }
+
+}
+
+let jugador = new Jugador(450, 550, 100, 10)
+
+let bloques = []
+
+
+let mySound;
+let pelota = new Pelota(500, 300, 10,mySound)
+
+function preload() {
+  soundFormats("wav");
+  mySound = loadSound("healsound.wav");
+}
 
 function setup() {
-    
+
     createCanvas(1000, 600)
+    for (let indexX = 20; indexX < width - 20; indexX += 70) {
+        for (let indexY = 100; indexY < 200; indexY += 20) {
+
+            bloques.push(new Bloque(indexX, indexY, 50, 10))
+
+        }
+
+
+
+    }
 
 }
 
-function draw(){
+function draw() {
     background(63, 197, 212)
+
     pelota.mover()
     pelota.mostrar()
+    pelota.rebotePala(jugador)
 
-    bloque1.mostrar() 
-    bloque2.mostrar()
+    jugador.mostrarPala()
+    jugador.moverPala()
+
+    bloques.forEach(element => {
+        if (!element.visible) return;
+        element.mostrar()
+        pelota.reboteBloque(element)
+    });
+
 
 }
-
-
-
-
-
 
 function mousePressed() {
-        if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
-            let fs = fullscreen();
-            fullscreen(!fs);
-        }
+    if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
+        let fs = fullscreen();
+        fullscreen(!fs);
     }
-
+}
 
 class Juego {
-    constructor() {
-
-    }
-}
-class Juegador {
-    constructor() {
-
-    }
-}
-class Pala {
     constructor() {
 
     }
